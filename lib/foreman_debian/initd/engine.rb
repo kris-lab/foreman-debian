@@ -38,11 +38,9 @@ module ForemanDebian
       end
 
       def stop
-        threads = []
         each_file do |path|
-          threads << Thread.new { stop_file(path) }
+          stop_file(path)
         end
-        ThreadsWait.all_waits(*threads)
       end
 
       def start_file(path)
