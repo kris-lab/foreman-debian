@@ -35,8 +35,8 @@ module ForemanDebian
           threads << Thread.new do
             exec_command("#{path.to_s} start")
             @output.info "  start  #{path.to_s}"
-            exec_command("update-rc.d #{path.basename} defaults") if path.dirname.eql? @system_export_path
           end
+          exec_command("update-rc.d #{path.basename} defaults") if path.dirname.eql? @system_export_path
         end
         ThreadsWait.all_waits(*threads)
       end
