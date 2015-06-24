@@ -32,13 +32,15 @@ describe ForemanDebian::Initd::Engine, :fakefs do
 
   it 'starts script' do
     script_path = Pathname.new('/etc/init.d/foo')
-    engine.start_file(script_path)
-    expect(engine.commands_run).to be == ['/etc/init.d/foo start', 'update-rc.d foo defaults']
+    engine.stub(:get_files).and_return([script_path])
+    engine.start
+    expect(engine.commands_run).to include('/etc/init.d/foo start', 'update-rc.d foo defaults')
   end
 
   it 'stops script' do
     script_path = Pathname.new('/etc/init.d/foo')
-    engine.stop_file(script_path)
-    expect(engine.commands_run).to be == ['/etc/init.d/foo stop', 'update-rc.d -f foo remove']
+    engine.stub(:get_files).and_return([script_path])
+    engine.stop
+    expect(engine.commands_run).to include('/etc/init.d/foo stop', 'update-rc.d -f foo remove')
   end
 end
