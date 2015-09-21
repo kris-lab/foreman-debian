@@ -36,17 +36,9 @@ module ForemanDebian
             start_process(path)
             @output.info "  start  #{path.to_s}"
           end
-          start_run_on_boot(path)
+          enable_start_process_on_boot(path)
         end
         ThreadsWait.all_waits(*threads)
-      end
-
-      def start_run_on_boot(path)
-        exec_command("update-rc.d #{path.basename} defaults") if path.dirname.eql? @system_export_path
-      end
-
-      def start_process(path)
-        exec_command("#{path.to_s} start")
       end
 
       def stop
@@ -56,22 +48,30 @@ module ForemanDebian
           threads << Thread.new do
             stop_process(path)
           end
-          stop_run_on_boot(path)
+          disable_start_process_on_boot(path)
         end
         ThreadsWait.all_waits(*threads)
+      end
+
+      def start_process(path)
+        exec_command("#{path.to_s} start")
       end
 
       def stop_process(path)
         exec_command("#{path.to_s} stop")
       end
 
-      def stop_run_on_boot(path)
+      def enable_start_process_on_boot(path)
+        exec_command("update-rc.d #{path.basename} defaults") if path.dirname.eql? @system_export_path
+      end
+
+      def disable_start_process_on_boot(path)
         exec_command("update-rc.d -f #{path.basename} remove") if path.dirname.eql? @system_export_path
       end
 
       def remove_file(path)
         stop_process(path)
-        stop_run_on_boot(path)
+        disable_start_process_on_boot(path)
         super(path)
       end
     end
