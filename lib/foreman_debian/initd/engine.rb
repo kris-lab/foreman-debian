@@ -46,15 +46,24 @@ module ForemanDebian
         each_file do |path|
           @output.info "   stop  #{path.to_s}"
           threads << Thread.new do
-            exec_command("#{path.to_s} stop")
+            stop_process(path)
           end
-          exec_command("update-rc.d -f #{path.basename} remove") if path.dirname.eql? @system_export_path
+          stop_run_on_boot(path)
         end
         ThreadsWait.all_waits(*threads)
       end
 
+      def stop_process(path)
+        exec_command("#{path.to_s} stop")
+      end
+
+      def stop_run_on_boot(path)
+        exec_command("update-rc.d -f #{path.basename} remove") if path.dirname.eql? @system_export_path
+      end
+
       def remove_file(path)
-        stop_file(path)
+        stop_process(path)
+        stop_run_on_boot(path)
         super(path)
       end
     end
